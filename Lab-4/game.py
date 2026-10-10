@@ -21,7 +21,7 @@ BLUE = (80, 150, 255)
 particles = []
 
 
-# Task 2: Return dirt colours based on underground depth.
+# Task 2: Underground dirt colors
 def dirt_color(row):
     """Return a dirt colour based on underground depth."""
     if row <= 3:
@@ -35,7 +35,7 @@ def dirt_color(row):
     return None
 
 
-# Task 3: Create a particle burst when an enemy is popped.
+# Task 3: Particle burst when an enemy is defeated
 def on_enemy_popped(enemy, score):
     """Create a particle burst when an enemy is popped."""
     center_x = enemy.x + TILE // 2
@@ -56,13 +56,13 @@ def on_enemy_popped(enemy, score):
         })
 
 
-# Task 4 is intentionally NOT implemented yet.
+# Task 4: Increase enemy speed as the level increases
 def enemy_speed_multiplier(level):
-    """Return an enemy speed multiplier for the given level."""
-    pass
+    """Make enemies faster as the level increases."""
+    return 1 + 0.1 * level
 
 
-# Task 1: BFS shortest-path search using a FIFO queue.
+# Task 1: BFS shortest-path enemy movement
 def bfs_path(start, goal, grid):
     """Find a shortest path through the grid using BFS."""
     queue = deque([start])
@@ -111,7 +111,10 @@ class Enemy:
         self.y = y * TILE
         self.pumped = 0
         self.direction = random.choice([
-            (1, 0), (-1, 0), (0, 1), (0, -1)
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
         ])
         self.move_timer = 0
 
@@ -182,8 +185,14 @@ class Game:
 
         keys = pygame.key.get_pressed()
 
-        dx = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
-        dy = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
+        dx = (
+            int(keys[pygame.K_RIGHT])
+            - int(keys[pygame.K_LEFT])
+        )
+        dy = (
+            int(keys[pygame.K_DOWN])
+            - int(keys[pygame.K_UP])
+        )
 
         if dx or dy:
             self.player_x = max(
@@ -192,7 +201,6 @@ class Game:
             self.player_y = max(
                 0, min(ROWS - 1, self.player_y + dy)
             )
-
             self.grid[self.player_y][self.player_x] = 0
 
         self.pumping = keys[pygame.K_SPACE]
@@ -203,8 +211,8 @@ class Game:
 
             for enemy in self.enemies[:]:
                 distance = (
-                    abs(int(enemy.x // TILE) - self.player_x)
-                    + abs(int(enemy.y // TILE) - self.player_y)
+                    abs(enemy.x // TILE - self.player_x)
+                    + abs(enemy.y // TILE - self.player_y)
                 )
 
                 if distance <= 2:
@@ -213,8 +221,6 @@ class Game:
                     if enemy.pumped >= 3:
                         self.enemies.remove(enemy)
                         self.score += 100
-
-                        # Task 3: Trigger particles after defeating the enemy.
                         on_enemy_popped(enemy, self.score)
 
         self.update_enemies(dt)
@@ -234,8 +240,11 @@ class Game:
         for enemy in self.enemies:
             enemy.move_timer += dt
 
-            # Original fixed movement timing; Task 4 is not implemented.
-            if enemy.move_timer < 0.35:
+            # Task 4: Shorter movement delay means faster enemies.
+            speed_multiplier = enemy_speed_multiplier(self.level)
+            move_delay = 0.35 / speed_multiplier
+
+            if enemy.move_timer < move_delay:
                 continue
 
             enemy.move_timer = 0
@@ -265,7 +274,6 @@ class Game:
     def draw(self):
         self.screen.fill(BLACK)
 
-        # Draw underground dirt.
         for row in range(ROWS):
             for col in range(COLS):
                 if self.grid[row][col] == 1:
@@ -283,7 +291,6 @@ class Game:
                             ),
                         )
 
-        # Draw the player.
         pygame.draw.rect(
             self.screen,
             GREEN,
@@ -295,16 +302,16 @@ class Game:
             ),
         )
 
-        # Draw enemies.
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
-        # Task 3: Draw the particle burst.
+        # Draw particles created when enemies are defeated.
         for particle in particles:
             radius = max(
                 1,
                 int(
-                    4 * particle["life"] / particle["max_life"]
+                    4 * particle["life"]
+                    / particle["max_life"]
                 ),
             )
 
@@ -318,10 +325,8 @@ class Game:
                 radius,
             )
 
-        # Draw score, lives, and level.
         info = self.font.render(
-            f"Score: {self.score}  Lives: {self.lives}  "
-            f"Level: {self.level}",
+            f"Score: {self.score}  Lives: {self.lives}  Level: {self.level}",
             True,
             WHITE,
         )
@@ -333,7 +338,6 @@ class Game:
                 True,
                 WHITE,
             )
-
             self.screen.blit(
                 message,
                 message.get_rect(
@@ -356,7 +360,6 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-
                     elif (
                         event.key == pygame.K_r
                         and self.state == "over"
