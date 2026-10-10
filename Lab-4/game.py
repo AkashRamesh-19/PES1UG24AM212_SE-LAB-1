@@ -6,22 +6,43 @@ import pygame
 
 TILE, COLS, ROWS = 32, 20, 14
 WIDTH, HEIGHT = COLS * TILE, ROWS * TILE + 36
-DIRS = {pygame.K_UP: (-1, 0), pygame.K_DOWN: (1, 0), pygame.K_LEFT: (0, -1), pygame.K_RIGHT: (0, 1)}
+
+DIRS = {
+    pygame.K_UP: (-1, 0),
+    pygame.K_DOWN: (1, 0),
+    pygame.K_LEFT: (0, -1),
+    pygame.K_RIGHT: (0, 1),
+}
+
 MOVE_DELAY, ENEMY_DELAY, PUMP_RANGE, DEFLATE_AFTER = 0.11, 0.35, 3, 1.5
 
 
+# Task 2: Give underground dirt different colours based on depth.
 def dirt_color(row):
-    """Return an (r, g, b) colour for dirt in the given row, or None for the default gradient."""
-    pass
+    """Return an RGB colour for dirt based on its depth."""
+    bands = [
+        (3, (170, 110, 60)),
+        (6, (150, 90, 50)),
+        (9, (125, 75, 45)),
+        (ROWS - 1, (100, 60, 40)),
+    ]
+
+    for max_row, color in bands:
+        if row <= max_row:
+            return color
+
+    return None
 
 
+# Task 3 will be implemented here.
 def on_enemy_popped(enemy, score):
-    """Called when an enemy is popped; add particles, bonus points, or a colour flash here."""
+    """Called when an enemy is popped."""
     pass
 
 
+# Task 4 will be implemented here.
 def enemy_speed_multiplier(level):
-    """Return a speed multiplier for enemies at the given level, or None for the default speed."""
+    """Return a speed multiplier for enemies at the given level."""
     pass
 
 
@@ -29,24 +50,36 @@ def in_bounds(r, c):
     return 0 <= r < ROWS and 0 <= c < COLS
 
 
+# Task 1: Use FIFO queue behaviour to implement BFS correctly.
 def bfs_path(grid, start, goal):
     queue, parents = deque([start]), {start: None}
+
     while queue:
-        # Task 1 fix: process the oldest queued cell first.
         cell = queue.popleft()
+
         if cell == goal:
             break
+
         for dr, dc in DIRS.values():
             nxt = (cell[0] + dr, cell[1] + dc)
-            if in_bounds(*nxt) and not grid[nxt[0]][nxt[1]] and nxt not in parents:
+
+            if (
+                in_bounds(*nxt)
+                and not grid[nxt[0]][nxt[1]]
+                and nxt not in parents
+            ):
                 parents[nxt] = cell
                 queue.append(nxt)
+
     if goal not in parents:
         return []
+
     path, cell = [], goal
+
     while cell != start:
         path.append(cell)
         cell = parents[cell]
+
     return path[::-1]
 
 
@@ -81,18 +114,26 @@ class Game:
         self.time = 0.0
         self.pump_target = None
         self.enemies = []
+
         for _ in range(3 + self.level):
-            r, c = random.randint(4, ROWS - 2), random.randint(1, COLS - 3)
+            r = random.randint(4, ROWS - 2)
+            c = random.randint(1, COLS - 3)
+
             for dc in range(3):
                 self.grid[r][c + dc] = False
-            self.enemies.append(Enemy((r, c + random.randint(0, 2))))
+
+            self.enemies.append(
+                Enemy((r, c + random.randint(0, 2)))
+            )
 
     def dig(self, cell):
         self.grid[cell[0]][cell[1]] = False
 
     def move_player(self, direction):
         self.facing = direction
-        nr, nc = self.player[0] + direction[0], self.player[1] + direction[1]
+        nr = self.player[0] + direction[0]
+        nc = self.player[1] + direction[1]
+
         if in_bounds(nr, nc):
             self.player = (nr, nc)
             self.dig(self.player)
@@ -101,25 +142,33 @@ class Game:
         for step in range(1, PUMP_RANGE + 1):
             r = self.player[0] + self.facing[0] * step
             c = self.player[1] + self.facing[1] * step
+
             if not in_bounds(r, c) or self.grid[r][c]:
                 return None
+
             for enemy in self.enemies:
                 if enemy.cell == (r, c):
                     return enemy
+
         return None
 
     def pump(self):
         enemy = self.find_pump_target()
         self.pump_target = enemy
+
         if enemy is None:
             return
+
         enemy.stage += 1
         enemy.last_pump = self.time
+
         if enemy.stage >= 4:
             self.enemies.remove(enemy)
             self.score += 200 + 100 * (enemy.cell[0] // 4)
             self.pump_target = None
+
             on_enemy_popped(enemy, self.score)
+
             if not self.enemies:
                 self.level += 1
                 self.start_level()
@@ -127,6 +176,7 @@ class Game:
     def hurt(self):
         self.lives -= 1
         self.player = (0, COLS // 2)
+
         if self.lives <= 0:
             self.state = "lose"
 
@@ -136,97 +186,200 @@ class Game:
                 enemy.stage -= 1
                 enemy.last_pump = self.time
             return
+
         enemy.ghost_timer -= dt
+
         if enemy.ghost_timer <= 0:
             enemy.ghost = not enemy.ghost
-            enemy.ghost_timer = 4.0 if enemy.ghost else random.uniform(6, 10)
+            enemy.ghost_timer = (
+                4.0 if enemy.ghost
+                else random.uniform(6, 10)
+            )
+
             if not enemy.ghost:
                 self.grid[enemy.cell[0]][enemy.cell[1]] = False
+
         enemy.step_timer -= dt
+
         if enemy.step_timer > 0:
             return
-        enemy.step_timer = ENEMY_DELAY * (1.6 if enemy.ghost else 1) / (enemy_speed_multiplier(self.level) or 1)
+
+        enemy.step_timer = (
+            ENEMY_DELAY * (1.6 if enemy.ghost else 1)
+            / (enemy_speed_multiplier(self.level) or 1)
+        )
+
         if enemy.ghost:
-            dr, dc = self.player[0] - enemy.cell[0], self.player[1] - enemy.cell[1]
+            dr = self.player[0] - enemy.cell[0]
+            dc = self.player[1] - enemy.cell[1]
+
             if abs(dr) >= abs(dc) and dr:
-                enemy.cell = (enemy.cell[0] + (1 if dr > 0 else -1), enemy.cell[1])
+                enemy.cell = (
+                    enemy.cell[0] + (1 if dr > 0 else -1),
+                    enemy.cell[1],
+                )
             elif dc:
-                enemy.cell = (enemy.cell[0], enemy.cell[1] + (1 if dc > 0 else -1))
+                enemy.cell = (
+                    enemy.cell[0],
+                    enemy.cell[1] + (1 if dc > 0 else -1),
+                )
+
             return
+
         path = bfs_path(self.grid, enemy.cell, self.player)
+
         if path:
             enemy.cell = path[0]
 
     def update(self, dt, keys):
         if self.state != "play":
             return
+
         self.time += dt
         self.move_timer -= dt
+
         if self.move_timer <= 0:
             for key, direction in DIRS.items():
                 if keys[key]:
                     self.move_player(direction)
                     self.move_timer = MOVE_DELAY
                     break
+
         for enemy in self.enemies[:]:
             self.update_enemy(enemy, dt)
+
             if enemy.cell == self.player and not enemy.locked:
                 self.hurt()
                 break
-        if self.pump_target and (self.pump_target not in self.enemies or not self.pump_target.locked):
+
+        if (
+            self.pump_target
+            and (
+                self.pump_target not in self.enemies
+                or not self.pump_target.locked
+            )
+        ):
             self.pump_target = None
 
     def draw(self, screen):
         screen.fill((30, 30, 60))
+
         for r in range(ROWS):
             for c in range(COLS):
-                rect = pygame.Rect(c * TILE, r * TILE, TILE, TILE)
+                rect = pygame.Rect(
+                    c * TILE, r * TILE, TILE, TILE
+                )
+
                 if r == 0:
-                    pygame.draw.rect(screen, (90, 170, 230), rect)
+                    pygame.draw.rect(
+                        screen, (90, 170, 230), rect
+                    )
                 elif self.grid[r][c]:
-                    shade = dirt_color(r) or (170 - r * 6, 110 - r * 4, 60)
+                    # Task 2: Use the depth-based dirt colour.
+                    shade = dirt_color(r) or (
+                        170 - r * 6,
+                        110 - r * 4,
+                        60,
+                    )
                     pygame.draw.rect(screen, shade, rect)
                 else:
-                    pygame.draw.rect(screen, (20, 12, 10), rect)
+                    pygame.draw.rect(
+                        screen, (20, 12, 10), rect
+                    )
+
         for enemy in self.enemies:
-            x, y = enemy.cell[1] * TILE + TILE // 2, enemy.cell[0] * TILE + TILE // 2
+            x = enemy.cell[1] * TILE + TILE // 2
+            y = enemy.cell[0] * TILE + TILE // 2
             radius = 10 + enemy.stage * 4
-            color = (230, 230, 240) if enemy.ghost else (230, 70, 70)
+            color = (
+                (230, 230, 240)
+                if enemy.ghost
+                else (230, 70, 70)
+            )
+
             pygame.draw.circle(screen, color, (x, y), radius)
-            pygame.draw.circle(screen, (255, 255, 255), (x - 4, y - 3), 3)
-            pygame.draw.circle(screen, (255, 255, 255), (x + 4, y - 3), 3)
-        px, py = self.player[1] * TILE + TILE // 2, self.player[0] * TILE + TILE // 2
-        pygame.draw.circle(screen, (250, 250, 250), (px, py), 12)
-        pygame.draw.rect(screen, (60, 120, 230), (px - 8, py - 12, 16, 8))
+            pygame.draw.circle(
+                screen, (255, 255, 255), (x - 4, y - 3), 3
+            )
+            pygame.draw.circle(
+                screen, (255, 255, 255), (x + 4, y - 3), 3
+            )
+
+        px = self.player[1] * TILE + TILE // 2
+        py = self.player[0] * TILE + TILE // 2
+
+        pygame.draw.circle(
+            screen, (250, 250, 250), (px, py), 12
+        )
+        pygame.draw.rect(
+            screen, (60, 120, 230),
+            (px - 8, py - 12, 16, 8)
+        )
+
         if self.pump_target:
-            tx, ty = self.pump_target.cell[1] * TILE + TILE // 2, self.pump_target.cell[0] * TILE + TILE // 2
-            pygame.draw.line(screen, (255, 255, 120), (px, py), (tx, ty), 3)
-        hud = self.font.render(f"Score {self.score}  Lives {self.lives}  Level {self.level}  R = reset", True, (240, 240, 240))
+            tx = self.pump_target.cell[1] * TILE + TILE // 2
+            ty = self.pump_target.cell[0] * TILE + TILE // 2
+
+            pygame.draw.line(
+                screen, (255, 255, 120),
+                (px, py), (tx, ty), 3
+            )
+
+        hud = self.font.render(
+            f"Score {self.score}  Lives {self.lives}  "
+            f"Level {self.level}  R = reset",
+            True,
+            (240, 240, 240),
+        )
         screen.blit(hud, (10, ROWS * TILE + 8))
+
         if self.state == "lose":
-            label = self.font.render("GAME OVER - Press R", True, (255, 255, 120))
-            screen.blit(label, label.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+            label = self.font.render(
+                "GAME OVER - Press R",
+                True,
+                (255, 255, 120),
+            )
+            screen.blit(
+                label,
+                label.get_rect(
+                    center=(WIDTH // 2, HEIGHT // 2)
+                ),
+            )
 
 
 def main():
     pygame.init()
+
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Dig Dug")
     clock = pygame.time.Clock()
     game = Game()
     running = True
+
     while running:
         dt = min(clock.tick(60) / 1000, 0.05)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and game.state == "play":
+
+            elif (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_SPACE
+                and game.state == "play"
+            ):
                 game.pump()
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+
+            elif (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_r
+            ):
                 game.reset()
+
         game.update(dt, pygame.key.get_pressed())
         game.draw(screen)
         pygame.display.flip()
+
     pygame.quit()
 
 
