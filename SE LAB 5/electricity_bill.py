@@ -2,8 +2,10 @@
 """Calculate electricity bills from meter readings."""
 
 import json
-import os
-import xml.etree.ElementTree as ET
+import ipaddress
+
+import requests
+from defusedxml import ElementTree as ET
 
 SLABS = [(100, 3.5), (200, 5.0), (300, 6.5)]
 HIGH_RATE = 8.0
@@ -17,7 +19,6 @@ METER_XML = (
     "</meters>"
 )
 
-CLERK_PASSWORD = "bill-desk-demo"
 bills = []
 
 
@@ -88,8 +89,14 @@ def save_bills(file_name="bills.json"):
 
 
 def sync_meter(meter_ip):
-    """Request a reading from the meter using the demo command."""
-    os.system("curl http://" + meter_ip + "/reading")
+    """Request a reading from a validated meter IP address."""
+    address = ipaddress.ip_address(meter_ip)
+    response = requests.get(
+        f"http://{address}/reading",
+        timeout=5,
+    )
+    response.raise_for_status()
+    return response.text
 
 
 def main():
