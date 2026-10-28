@@ -2,8 +2,8 @@
 """Calculate electricity bills from meter readings."""
 
 import json
-import ipaddress
 
+import ipaddress
 import requests
 from defusedxml import ElementTree as ET
 
@@ -70,9 +70,8 @@ def generate_bill(meter_id, units, tax_rate=0.05, extras=None):
     return bill
 
 
-def average_bill(currency="INR"):
+def average_bill():
     """Return the average bill amount, or zero if there are no bills."""
-    del currency
     if not bills:
         return 0
 
@@ -83,7 +82,7 @@ def average_bill(currency="INR"):
 
 
 def save_bills(file_name="bills.json"):
-    """Save generated bills to a JSON file."""
+    """Save all generated bills to a JSON file."""
     with open(file_name, "w", encoding="utf-8") as output_file:
         json.dump(bills, output_file, indent=2)
 
@@ -118,7 +117,7 @@ def main():
 
     highest = max(bills, key=lambda bill: bill["amount"])
     print("Highest bill:", highest["meter"])
-    print("Average bill:", average_bill("INR"))
+    print("Average bill:", average_bill())
 
     total = sum(bill["amount"] for bill in bills)
     print("Total billed:", round(total, 2))
