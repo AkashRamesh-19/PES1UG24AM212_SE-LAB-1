@@ -1,0 +1,8 @@
+==== Running parse_coins ====
+Enter coin values as CSV (e.g. 5,10,25): Coins: [5, 10, 25]
+
+==== Running slot_position ====
+Enter a slot code (e.g. B7): Row and Column: (1, 6)
+
+==== Running change_due ====
+Enter paid/price (e.g. 200/150): Change Due: 10 five-coins

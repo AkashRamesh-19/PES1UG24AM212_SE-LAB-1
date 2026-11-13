@@ -1,0 +1,201 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\sudha\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1
+plugins: anyio-4.15.1, hypothesis-6.170.15, langsmith-0.14.5, platformdirs-4.12.4
+collecting ... collected 10 items
+
+Lab 7/test_vending_machine.py::test_parse_coins_returns_the_input_integers PASSED [ 10%]
+Lab 7/test_vending_machine.py::test_parse_coins_rejects_malformed_or_negative_values FAILED [ 20%]
+Lab 7/test_vending_machine.py::test_parse_coins_rejects_non_string_input FAILED [ 30%]
+Lab 7/test_vending_machine.py::test_slot_position_maps_valid_codes_to_zero_based_positions PASSED [ 40%]
+Lab 7/test_vending_machine.py::test_slot_position_rejects_malformed_codes FAILED [ 50%]
+Lab 7/test_vending_machine.py::test_slot_position_rejects_non_string_input FAILED [ 60%]
+Lab 7/test_vending_machine.py::test_change_due_reports_five_coin_count_when_payment_covers_price PASSED [ 70%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_malformed_or_negative_amounts FAILED [ 80%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_payment_below_price FAILED [ 90%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_non_string_input FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_parse_coins_rejects_malformed_or_negative_values ____________
+
+    @given(st.sampled_from(["", "1,,3", ",1", "1,", "one,two", "-1", "\u0661"]))
+>   def test_parse_coins_rejects_malformed_or_negative_values(csv):
+                   ^^^
+
+Lab 7\test_vending_machine.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+csv = '-1'
+
+    @given(st.sampled_from(["", "1,,3", ",1", "1,", "one,two", "-1", "\u0661"]))
+    def test_parse_coins_rejects_malformed_or_negative_values(csv):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+E       Failing test case: test_parse_coins_rejects_malformed_or_negative_values(
+E           csv='-1',
+E       )
+
+Lab 7\test_vending_machine.py:19: Failed
+__________________ test_parse_coins_rejects_non_string_input __________________
+
+    @given(st.one_of(st.none(), st.integers(), st.lists(st.text())))
+>   def test_parse_coins_rejects_non_string_input(value):
+                   ^^^
+
+Lab 7\test_vending_machine.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Lab 7\test_vending_machine.py:26: in test_parse_coins_rejects_non_string_input
+    parse_coins(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+coins_csv = None
+
+    def parse_coins(coins_csv):
+>       return [int(c) for c in coins_csv.split(',')]
+                                ^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+E       Failing test case: test_parse_coins_rejects_non_string_input(
+E           value=None,  # or any other generated value
+E       )
+
+Lab 7\vending_machine.py:2: AttributeError
+_________________ test_slot_position_rejects_malformed_codes __________________
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\test_vending_machine.py", line 35, in test_slot_position_rejects_malformed_codes
+  |     def test_slot_position_rejects_malformed_codes(code):
+  |                    ^^^
+  | BaseExceptionGroup: Hypothesis found 2 distinct failures. (2 sub-exceptions)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\test_vending_machine.py", line 36, in test_slot_position_rejects_malformed_codes
+    |     with pytest.raises(ValueError):
+    |          ~~~~~~~~~~~~~^^^^^^^^^^^^
+    | Failed: DID NOT RAISE ValueError
+    | Failing test case: test_slot_position_rejects_malformed_codes(
+    |     code='B0',
+    | )
+    | Explanation:
+    |     These lines were always and only run by failing test cases:
+    |         C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\vending_machine.py:7
+    +---------------- 2 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\test_vending_machine.py", line 37, in test_slot_position_rejects_malformed_codes
+    |     slot_position(code)
+    |     ~~~~~~~~~~~~~^^^^^^
+    |   File "C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\vending_machine.py", line 5, in slot_position
+    |     row = ord(code[0].upper()) - ord('A')
+    |               ~~~~^^^
+    | IndexError: string index out of range
+    | Failing test case: test_slot_position_rejects_malformed_codes(
+    |     code='',
+    | )
+    +------------------------------------
+_________________ test_slot_position_rejects_non_string_input _________________
+
+    @given(st.one_of(st.none(), st.integers(), st.lists(st.text())))
+>   def test_slot_position_rejects_non_string_input(value):
+                   ^^^
+
+Lab 7\test_vending_machine.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Lab 7\test_vending_machine.py:43: in test_slot_position_rejects_non_string_input
+    slot_position(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+code = []
+
+    def slot_position(code):
+>       row = ord(code[0].upper()) - ord('A')
+                  ^^^^^^^
+E       IndexError: list index out of range
+E       Failing test case: test_slot_position_rejects_non_string_input(
+E           value=[],
+E       )
+
+Lab 7\vending_machine.py:5: IndexError
+____________ test_change_due_rejects_malformed_or_negative_amounts ____________
+
+    @given(st.sampled_from(["", "100", "/10", "10/", "1/2/3", "one/2", "10/-1", "\u0661/0"]))
+>   def test_change_due_rejects_malformed_or_negative_amounts(payment):
+                   ^^^
+
+Lab 7\test_vending_machine.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payment = '10/-1'
+
+    @given(st.sampled_from(["", "100", "/10", "10/", "1/2/3", "one/2", "10/-1", "\u0661/0"]))
+    def test_change_due_rejects_malformed_or_negative_amounts(payment):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+E       Failing test case: test_change_due_rejects_malformed_or_negative_amounts(
+E           payment='10/-1',
+E       )
+E       Explanation:
+E           These lines were always and only run by failing test cases:
+E               C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1\Lab 7\vending_machine.py:12
+
+Lab 7\test_vending_machine.py:58: Failed
+_________________ test_change_due_rejects_payment_below_price _________________
+
+    @given(st.integers(min_value=0, max_value=10**50))
+>   def test_change_due_rejects_payment_below_price(amount):
+                   ^^^
+
+Lab 7\test_vending_machine.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+amount = 0
+
+    @given(st.integers(min_value=0, max_value=10**50))
+    def test_change_due_rejects_payment_below_price(amount):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+E       Failing test case: test_change_due_rejects_payment_below_price(
+E           amount=0,  # or any other generated value
+E       )
+
+Lab 7\test_vending_machine.py:64: Failed
+__________________ test_change_due_rejects_non_string_input ___________________
+
+    @given(st.one_of(st.none(), st.integers(), st.lists(st.text())))
+>   def test_change_due_rejects_non_string_input(value):
+                   ^^^
+
+Lab 7\test_vending_machine.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Lab 7\test_vending_machine.py:71: in test_change_due_rejects_non_string_input
+    change_due(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payment = None
+
+    def change_due(payment):
+>       paid, price = payment.split('/')
+                      ^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+E       Failing test case: test_change_due_rejects_non_string_input(
+E           value=None,  # or any other generated value
+E       )
+
+Lab 7\vending_machine.py:10: AttributeError
+============================== warnings summary ===============================
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\langsmith\_internal\_beta_decorator.py:70: 13 warnings
+  C:\Users\sudha\AppData\Local\Programs\Python\Python314\Lib\site-packages\langsmith\_internal\_beta_decorator.py:70: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED Lab 7/test_vending_machine.py::test_parse_coins_rejects_malformed_or_negative_values
+FAILED Lab 7/test_vending_machine.py::test_parse_coins_rejects_non_string_input
+FAILED Lab 7/test_vending_machine.py::test_slot_position_rejects_malformed_codes
+FAILED Lab 7/test_vending_machine.py::test_slot_position_rejects_non_string_input
+FAILED Lab 7/test_vending_machine.py::test_change_due_rejects_malformed_or_negative_amounts
+FAILED Lab 7/test_vending_machine.py::test_change_due_rejects_payment_below_price
+FAILED Lab 7/test_vending_machine.py::test_change_due_rejects_non_string_input
+================== 7 failed, 3 passed, 13 warnings in 2.93s ===================

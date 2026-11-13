@@ -31,7 +31,7 @@ def test_slot_position_maps_valid_codes_to_zero_based_positions(row, column):
     assert slot_position(f"{row}{column}") == (ord(row) - ord("A"), column - 1)
 
 
-@given(st.sampled_from(["", "B", "B0", "B-1", "7", "BB", "B١", "A1x"]))
+@given(st.sampled_from(["", "B", "B0", "B-1", "7", "BB", "ß1", "B١", "A1x"]))
 def test_slot_position_rejects_malformed_codes(code):
     with pytest.raises(ValueError):
         slot_position(code)
@@ -69,3 +69,4 @@ def test_change_due_rejects_payment_below_price(amount):
 def test_change_due_rejects_non_string_input(value):
     with pytest.raises(TypeError):
         change_due(value)
+

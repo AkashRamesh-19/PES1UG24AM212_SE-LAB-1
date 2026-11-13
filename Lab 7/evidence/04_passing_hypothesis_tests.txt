@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\sudha\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: C:\Users\sudha\Documents\Codex\2026-11-17\files-mentioned-by-the-user-lab\work\PES1UG24AM212_SE-LAB-1
+plugins: anyio-4.15.1, hypothesis-6.170.15, langsmith-0.14.5, platformdirs-4.12.4
+collecting ... collected 10 items
+
+Lab 7/test_vending_machine.py::test_parse_coins_returns_the_input_integers PASSED [ 10%]
+Lab 7/test_vending_machine.py::test_parse_coins_rejects_malformed_or_negative_values PASSED [ 20%]
+Lab 7/test_vending_machine.py::test_parse_coins_rejects_non_string_input PASSED [ 30%]
+Lab 7/test_vending_machine.py::test_slot_position_maps_valid_codes_to_zero_based_positions PASSED [ 40%]
+Lab 7/test_vending_machine.py::test_slot_position_rejects_malformed_codes PASSED [ 50%]
+Lab 7/test_vending_machine.py::test_slot_position_rejects_non_string_input PASSED [ 60%]
+Lab 7/test_vending_machine.py::test_change_due_reports_five_coin_count_when_payment_covers_price PASSED [ 70%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_malformed_or_negative_amounts PASSED [ 80%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_payment_below_price PASSED [ 90%]
+Lab 7/test_vending_machine.py::test_change_due_rejects_non_string_input PASSED [100%]
+
+============================== warnings summary ===============================
+..\..\..\..\..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\langsmith\_internal\_beta_decorator.py:70: 13 warnings
+  C:\Users\sudha\AppData\Local\Programs\Python\Python314\Lib\site-packages\langsmith\_internal\_beta_decorator.py:70: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 10 passed, 13 warnings in 0.77s =======================

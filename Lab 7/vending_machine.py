@@ -50,7 +50,7 @@ def slot_position(code):
     integers. Invalid codes raise ValueError and non-string inputs TypeError.
     """
     _require_text(code, "code")
-    if len(code) < 2 or not ("A" <= code[0].upper() <= "Z"):
+    if len(code) < 2 or not (("A" <= code[0] <= "Z") or ("a" <= code[0] <= "z")):
         raise ValueError("code must start with one ASCII letter from A to Z")
 
     column_text = code[1:]
@@ -102,3 +102,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
